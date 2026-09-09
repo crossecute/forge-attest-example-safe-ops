@@ -24,9 +24,9 @@ interface Vm {
 /// @title Propose
 /// @notice OPTIONAL companion to the producers. Reads a **canonical SafeTx JSON**,
 ///         recomputes the EIP-712 Safe transaction hash, signs it with a proposer
-///         key, and writes `out/proposal.json` — the exact body to POST to the
-///         Safe Transaction Service. The HTTP POST itself is done by `propose.sh`
-///         (Foundry can't cleanly POST).
+///         key, and writes `out/proposal.json`. That file is the exact body to
+///         POST to the Safe Transaction Service. `propose.sh` does the POST,
+///         because Foundry cannot do it cleanly.
 ///
 ///         Requires:  PROPOSER_PK  (env, hex private key of a Safe owner/delegate)
 ///         Optional:  SAFE_TX_JSON (env, path relative to the project root;
@@ -34,20 +34,20 @@ interface Vm {
 ///         Run with:  forge script script/Propose.s.sol:Propose
 ///
 ///         `BuildSafeTx` writes a canonical SafeTx directly. `BuildSafeBatch`
-///         writes a Transaction Builder batch, which is not yet a transaction —
-///         fold it into a canonical SafeTx first, binding it to a Safe and nonce:
+///         writes a Transaction Builder batch, which is not yet a transaction.
+///         Fold it into a canonical SafeTx first, binding it to a Safe and nonce:
 ///
 ///           ../forge-attest/lib/normalize.sh --input out/safe-batch.json \
 ///             --safe 0x<safe> --nonce <n> > out/canonical-safe-tx.json
 ///           SAFE_TX_JSON=out/canonical-safe-tx.json forge script script/Propose.s.sol:Propose
 ///
-///         Folding lives in `forge-attest` rather than being reimplemented here on
-///         purpose: the MultiSend packing that decides what owners sign should have
-///         exactly one implementation on the producing side, and it should be the
-///         one the verifier independently re-derives.
+///         Folding lives in `forge-attest` rather than being reimplemented here,
+///         on purpose. The MultiSend packing decides what owners sign, so it
+///         should have exactly one implementation on the producing side, and it
+///         should be the one the verifier independently re-derives.
 ///
-///         This step needs a real Safe + a real proposer key + network to be
-///         useful; it is NOT part of the attestation/CI path.
+///         This step needs a real Safe, a real proposer key, and a network to be
+///         useful. It is NOT part of the attestation or CI path.
 contract Propose {
     Vm internal constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
@@ -98,10 +98,11 @@ contract Propose {
         uint256 pk = vm.envUint("PROPOSER_PK");
         address sender = vm.addr(pk);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(pk, safeTxHash);
-        bytes memory signature = abi.encodePacked(r, s, v); // Safe/Ethereum layout
+        bytes memory signature = abi.encodePacked(r, s, v); // the Safe and Ethereum layout
 
-        // Safe Transaction Service POST body. operation & nonce are numbers;
-        // value & gas fields are strings; hashes/sig/addresses are hex strings.
+        // Safe Transaction Service POST body. `operation` and `nonce` are
+        // numbers. The value and gas fields are strings. Hashes, the signature,
+        // and addresses are hex strings.
         string memory origin = vm.envOr("PROPOSAL_ORIGIN", string("forge-attest-example"));
         string memory payload = string.concat(
             "{\n",
