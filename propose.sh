@@ -29,15 +29,15 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ -f "$PAYLOAD" ]] || { echo "missing $PAYLOAD — run the Propose script first" >&2; exit 1; }
-[[ -f "$SAFE_TX" ]] || { echo "missing $SAFE_TX — pass --safe-tx <canonical SafeTx json>" >&2; exit 1; }
+[[ -f "$PAYLOAD" ]] || { echo "missing $PAYLOAD: run the Propose script first" >&2; exit 1; }
+[[ -f "$SAFE_TX" ]] || { echo "missing $SAFE_TX: pass --safe-tx <canonical SafeTx json>" >&2; exit 1; }
 
 # The Safe address lives in the built tx, not the proposal body.
 SAFE=$(jq -r .safe "$SAFE_TX")
 
-# Safe Transaction Service base URLs are per-network, e.g.
+# Safe Transaction Service base URLs are per-network, for example
 #   ethereum -> https://safe-transaction-mainnet.safe.global
-# Map the common names; extend as needed.
+# The common names are mapped below. Add more as needed.
 case "$NETWORK" in
   ethereum|mainnet) HOST="safe-transaction-mainnet.safe.global" ;;
   arbitrum)         HOST="safe-transaction-arbitrum.safe.global" ;;
@@ -46,7 +46,7 @@ case "$NETWORK" in
   polygon)          HOST="safe-transaction-polygon.safe.global" ;;
   gnosis)           HOST="safe-transaction-gnosis-chain.safe.global" ;;
   sepolia)          HOST="safe-transaction-sepolia.safe.global" ;;
-  *) echo "unknown network '$NETWORK' — add its Transaction Service host to propose.sh" >&2; exit 1 ;;
+  *) echo "unknown network '$NETWORK': add its Transaction Service host to propose.sh" >&2; exit 1 ;;
 esac
 
 URL="https://${HOST}/api/v1/safes/${SAFE}/multisig-transactions/"
