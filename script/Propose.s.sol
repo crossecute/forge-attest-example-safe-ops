@@ -22,7 +22,7 @@ interface Vm {
 }
 
 /// @title Propose
-/// @notice OPTIONAL companion to the producers. Reads a **canonical SafeTx JSON**,
+/// @notice Optional companion to the producers. Reads a **canonical SafeTx JSON**,
 ///         recomputes the EIP-712 Safe transaction hash, signs it with a proposer
 ///         key, and writes `out/proposal.json`. That file is the exact body to
 ///         POST to the Safe Transaction Service. `propose.sh` does the POST,
@@ -47,7 +47,7 @@ interface Vm {
 ///         should be the one the verifier independently re-derives.
 ///
 ///         This step needs a real Safe, a real proposer key, and a network to be
-///         useful. It is NOT part of the attestation or CI path.
+///         useful. It is not part of the attestation or CI path.
 contract Propose {
     Vm internal constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 

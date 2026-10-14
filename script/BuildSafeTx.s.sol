@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-/// @dev Minimal cheatcode surface, declared inline so this example repo has ZERO
+/// @dev Minimal cheatcode surface, declared inline so this example repo has zero
 ///      dependencies: no forge-std, no `forge install`. That keeps the producer
 ///      self-contained, and makes its output easy to reproduce.
 interface Vm {

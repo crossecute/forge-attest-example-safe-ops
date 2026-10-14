@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# OPTIONAL: submit the built transaction to the Safe Transaction Service.
+# Optional: submit the built transaction to the Safe Transaction Service.
 #
 #   1. Build the tx          : forge script script/BuildSafeTx.s.sol:BuildSafeTx
 #   2. Sign + make payload   : PROPOSER_PK=0x... forge script script/Propose.s.sol:Propose
