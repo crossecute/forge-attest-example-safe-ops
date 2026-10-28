@@ -84,49 +84,18 @@ Safe `0x111CEEee040739fD91D29C34C33E6B3E112F2177`:
   `USDC.transfer(0x…dEaD, 1 USDC)`. A revoke and a transfer that must land
   together or not at all.
 
-## Optional: proposing to the Safe (separate from attestation)
+## Proposing to the Safe
 
-Building the tx and *submitting* it to the Safe are deliberately separate steps.
-Submission is exactly where a value could be tampered with, and it is what
-`forge-attest` independently checks. This repo includes an optional path that
-signs and proposes the built tx to the Safe Transaction Service:
-
-```bash
-# 1. build the canonical tx
-forge script script/BuildSafeTx.s.sol:BuildSafeTx
-
-# 2. sign the Safe tx hash and emit the Transaction Service payload
-PROPOSER_PK=0x<owner-or-delegate-key> forge script script/Propose.s.sol:Propose
-
-# 3. POST it (needs network + a valid proposer)
-./propose.sh --network ethereum
-```
-
-- `Propose.s.sol` recomputes the EIP-712 Safe tx hash from a canonical SafeTx JSON,
-  signs it, and writes `out/proposal.json`, which is the exact POST body including
-  `contractTransactionHash`.
-- `propose.sh` submits that payload to the network's Transaction Service.
-
-### Proposing a batch
-
-A batch has to be folded and bound first. Reuse `forge-attest`'s normaliser rather
-than reimplementing MultiSend packing here. The packing decides what owners sign,
-so it should have one implementation on this side and be independently re-derived
-by the verifier, not two copies that can drift:
+Proposing is done by `forge-attest` itself, not by this repo. Once a claim for one
+of these scripts attests, `attest.sh --propose` signs the canonical SafeTx it
+checked with the signer's own `cast` wallet and submits it to the Safe Transaction
+Service, or adds a confirmation if it is already queued:
 
 ```bash
-forge script script/BuildSafeBatch.s.sol:BuildSafeBatch
-
-../forge-attest/lib/normalize.sh --input out/safe-batch.json \
-  --safe 0x111CEEee040739fD91D29C34C33E6B3E112F2177 --nonce 43 \
-  > out/canonical-safe-tx.json
-
-PROPOSER_PK=0x<key> SAFE_TX_JSON=out/canonical-safe-tx.json \
-  forge script script/Propose.s.sol:Propose
-
-./propose.sh --network ethereum --safe-tx out/canonical-safe-tx.json
+SAFE_API_KEY=<key> ../forge-attest/attest.sh --config <claim>.toml --propose -- --ledger
 ```
 
-The proposer key must be a Safe **owner or registered delegate**. This path is
-**not** part of the attestation or CI pipeline. It only demonstrates the real
-submission step that `forge-attest` later verifies against.
+Batches need no separate folding step: the claim binds the batch to its Safe and
+nonce, and what is signed is the same canonical form the verifier hashed. See
+"Proposing from the command line" in the
+[`forge-attest` README](https://github.com/crossecute/forge-attest#proposing-from-the-command-line).
