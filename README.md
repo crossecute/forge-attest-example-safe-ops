@@ -84,18 +84,18 @@ Safe `0x111CEEee040739fD91D29C34C33E6B3E112F2177`:
   `USDC.transfer(0x…dEaD, 1 USDC)`. A revoke and a transfer that must land
   together or not at all.
 
-## Proposing to the Safe
+## Signing off in the Safe
 
-Proposing is done by `forge-attest` itself, not by this repo. Once a claim for one
-of these scripts attests, `attest.sh --propose` signs the canonical SafeTx it
+Signing is done by `forge-attest` itself, not by this repo. Once a claim for one
+of these scripts attests, `attest.sh --attest` signs the canonical SafeTx it
 checked with the signer's own `cast` wallet and submits it to the Safe Transaction
-Service, or adds a confirmation if it is already queued:
+Service: as the proposal, or as a confirmation if it is already queued:
 
 ```bash
-SAFE_API_KEY=<key> ../forge-attest/attest.sh --config <claim>.toml --propose -- --ledger
+SAFE_API_KEY=<key> ../forge-attest/attest.sh --config <claim>.toml --attest -- --ledger
 ```
 
 Batches need no separate folding step: the claim binds the batch to its Safe and
 nonce, and what is signed is the same canonical form the verifier hashed. See
-"Proposing from the command line" in the
-[`forge-attest` README](https://github.com/crossecute/forge-attest#proposing-from-the-command-line).
+"Signing off from the command line" in the
+[`forge-attest` README](https://github.com/crossecute/forge-attest#signing-off-from-the-command-line).
