@@ -1,0 +1,18 @@
+name: Attest examples
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: crossecute/forge-attest@9d8905bee25689f0346dfd3db2cc4a5cad0ce31f # v1.2.0
+        with:
+          config: attest.toml
