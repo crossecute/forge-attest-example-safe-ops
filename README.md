@@ -1,6 +1,6 @@
 # forge-attest-example-safe-ops
 
-A reference "producer" repo for [`forge-attest`](../forge-attest). It stands in
+A reference "producer" repo for [`forge-attest`](https://github.com/crossecute/forge-attest/tree/v1.2.0). It stands in
 for a real operations repo whose Forge scripts build transactions to be submitted
 to a Gnosis Safe.
 
@@ -15,6 +15,34 @@ There are two producers, one per JSON shape `forge-attest` verifies:
 forge script script/BuildSafeTx.s.sol:BuildSafeTx        && cat out/safe-tx.json
 forge script script/BuildSafeBatch.s.sol:BuildSafeBatch  && cat out/safe-batch.json
 ```
+
+## Verify with forge-attest v1.2.0
+
+[`attest.toml`](attest.toml) covers both scripts at a pinned producer commit.
+Each `[[run]]` runs one script, `[run.defaults]` sets its normalization options,
+and `[[run.claim]]` pins its output hashes, chain, Safe and nonce. The scripts
+use constants, so they need no `[run.env]` inputs or dependency setup.
+
+With Foundry, Git, Bash and jq installed, run from this repo:
+
+```bash
+git clone https://github.com/crossecute/forge-attest.git ../forge-attest
+git -C ../forge-attest checkout --detach 9d8905bee25689f0346dfd3db2cc4a5cad0ce31f # v1.2.0
+../forge-attest/attest.sh --config attest.toml
+```
+
+The [CI workflow](.github/workflows/attest.yml) pins the action to the same release
+commit. Both paths re-run the pinned producer and check the canonical hashes with
+cast and Solidity. The flat transaction also pins its raw file hash. The batch
+leaves that pin blank because `createdAt` changes.
+
+These demo claims leave `safe_network` blank, so verification skips the live queue
+check and needs no Safe API key. A passing run verifies the producer output;
+it does not prove either demo transaction is queued. To adapt the example, pin
+your producer commit, Safe, nonce and reviewed hashes, set `safe_network` on each
+claim, and use `--require-live` (or `require-live: true` in CI) to require a match
+in the Safe queue. The producer pin is independent of the workflow checkout;
+update it deliberately when changing the scripts.
 
 ## The two shapes, and why the difference matters
 
@@ -52,8 +80,8 @@ Note what is *missing*: no Safe address, no nonce, no gas fields. **A batch is n
 yet a transaction.** It becomes one only when it is bound to a specific Safe at a
 specific nonce and folded into a single `multiSend(bytes)` delegatecall. That is
 what the Safe UI does on submission, and what owners actually sign.
-`forge-attest` performs that fold from its own config, so the Safe address and
-nonce live in the attestation claim rather than in this repo.
+`forge-attest` performs that fold from its config, so the Safe address and
+nonce live in the attestation claim rather than in the batch JSON.
 
 Note also `createdAt`. `SafeTxHelper` stamps it with `block.timestamp * 1000`, and
 `BuildSafeBatch` copies that behaviour exactly. Under a fork or a broadcast the
@@ -84,49 +112,19 @@ Safe `0x111CEEee040739fD91D29C34C33E6B3E112F2177`:
   `USDC.transfer(0x…dEaD, 1 USDC)`. A revoke and a transfer that must land
   together or not at all.
 
-## Optional: proposing to the Safe (separate from attestation)
+## Signing off in the Safe
 
-Building the tx and *submitting* it to the Safe are deliberately separate steps.
-Submission is exactly where a value could be tampered with, and it is what
-`forge-attest` independently checks. This repo includes an optional path that
-signs and proposes the built tx to the Safe Transaction Service:
-
-```bash
-# 1. build the canonical tx
-forge script script/BuildSafeTx.s.sol:BuildSafeTx
-
-# 2. sign the Safe tx hash and emit the Transaction Service payload
-PROPOSER_PK=0x<owner-or-delegate-key> forge script script/Propose.s.sol:Propose
-
-# 3. POST it (needs network + a valid proposer)
-./propose.sh --network ethereum
-```
-
-- `Propose.s.sol` recomputes the EIP-712 Safe tx hash from a canonical SafeTx JSON,
-  signs it, and writes `out/proposal.json`, which is the exact POST body including
-  `contractTransactionHash`.
-- `propose.sh` submits that payload to the network's Transaction Service.
-
-### Proposing a batch
-
-A batch has to be folded and bound first. Reuse `forge-attest`'s normaliser rather
-than reimplementing MultiSend packing here. The packing decides what owners sign,
-so it should have one implementation on this side and be independently re-derived
-by the verifier, not two copies that can drift:
+Signing is done by `forge-attest` itself. After adapting the demo claims for your
+own transactions and setting each claim's `safe_network` (for example,
+`"ethereum"`), `attest.sh --attest` signs the canonical SafeTx it
+checked with the signer's own `cast` wallet and submits it to the Safe Transaction
+Service: as the proposal, or as a confirmation if it is already queued:
 
 ```bash
-forge script script/BuildSafeBatch.s.sol:BuildSafeBatch
-
-../forge-attest/lib/normalize.sh --input out/safe-batch.json \
-  --safe 0x111CEEee040739fD91D29C34C33E6B3E112F2177 --nonce 43 \
-  > out/canonical-safe-tx.json
-
-PROPOSER_PK=0x<key> SAFE_TX_JSON=out/canonical-safe-tx.json \
-  forge script script/Propose.s.sol:Propose
-
-./propose.sh --network ethereum --safe-tx out/canonical-safe-tx.json
+SAFE_API_KEY=<key> ../forge-attest/attest.sh --config my-claims.toml --attest -- --ledger
 ```
 
-The proposer key must be a Safe **owner or registered delegate**. This path is
-**not** part of the attestation or CI pipeline. It only demonstrates the real
-submission step that `forge-attest` later verifies against.
+Batches need no separate folding step: the claim binds the batch to its Safe and
+nonce, and what is signed is the same canonical form the verifier hashed. See
+"Signing off from the command line" in the
+[`forge-attest` v1.2.0 README](https://github.com/crossecute/forge-attest/blob/v1.2.0/README.md#signing-off-from-the-command-line).
