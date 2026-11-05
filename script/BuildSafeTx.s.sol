@@ -1,17 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-/// @dev Minimal cheatcode surface, declared inline so this example repo has zero
-///      dependencies: no forge-std, no `forge install`. That keeps the producer
-///      self-contained, and makes its output easy to reproduce.
-interface Vm {
-    function toString(address value) external pure returns (string memory);
-    function toString(uint256 value) external pure returns (string memory);
-    function toString(bytes calldata value) external pure returns (string memory);
-    function projectRoot() external view returns (string memory);
-    function createDir(string calldata path, bool recursive) external;
-    function writeFile(string calldata path, string calldata data) external;
-}
+import {SafeExample} from "./SafeExample.sol";
 
 /// @title BuildSafeTx
 /// @notice A stand-in for a "real" ops repo's Forge script. It builds a single
@@ -23,8 +13,7 @@ interface Vm {
 ///         concatenation, so running this script always yields identical JSON.
 ///         That is what lets `forge-attest` pin a sha256 of the output and catch
 ///         any tampering.
-contract BuildSafeTx {
-    Vm internal constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+contract BuildSafeTx is SafeExample {
 
     // Pinned transaction inputs. A real script would derive these.
     address internal constant SAFE      = 0x111CEEee040739fD91D29C34C33E6B3E112F2177;
@@ -72,8 +61,6 @@ contract BuildSafeTx {
             "}\n"
         );
 
-        string memory outDir = string.concat(vm.projectRoot(), "/out");
-        vm.createDir(outDir, true);
-        vm.writeFile(string.concat(outDir, "/safe-tx.json"), json);
+        _write("safe-tx.json", json);
     }
 }

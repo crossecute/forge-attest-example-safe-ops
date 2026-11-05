@@ -1,6 +1,6 @@
-# Worked claims for forge-attest v1.2.0, with live queue checks disabled.
+# Worked claims for forge-attest v1.3.0, with live queue checks disabled.
 producer_repo = "https://github.com/crossecute/forge-attest-example-safe-ops"
-producer_commit = "6bfc8446017e2da9302ce0b69af2eec600e12928"
+producer_commit = "cd75db7acc7286d70ddfd3b76659fcd143ab14f1"
 producer_setup = ""
 
 [[run]]
@@ -38,3 +38,79 @@ safe_network = ""
 expected_output_sha256 = ""
 expected_canonical_sha256 = "3e04aa55c436e16cae1ce12e2c43922536ce1a1dfad9d6041c874ad382768efd"
 expected_safe_tx_hash = "0x7f9d67d21eabf50afc3c0ef625d519918b4ca7037730caa7544576e12ad0c115"
+
+[[run]]
+script = "script/BuildSafeEip712.s.sol:BuildSafeEip712"
+
+[run.defaults]
+input_format = "safe-eip712"
+input_profile = "safe"
+safe_version = "1.3.0"
+
+[[run.claim]]
+output_path = "out/safe-eip712.json"
+chain_id = "1"
+safe_address = "0x111CEEee040739fD91D29C34C33E6B3E112F2177"
+safe_nonce = "44"
+safe_network = ""
+expected_output_sha256 = "361ca648e5120f7768c744ef50b713d4d388c2eab7ae70be79a6deb030409918"
+expected_canonical_sha256 = "10ed2e93bc46cbc226fdfd12daecb455473d2bd288311963fe7d644045d10180"
+expected_safe_tx_hash = "0xbafe88fd387c8f0b5048419b38b0298ae59ea1d71433537930ee457aceb0860e"
+
+[[run.claim]]
+output_path = "out/safe-eip712-utils.json"
+input_profile = "safe-utils"
+chain_id = "1"
+safe_address = "0x111CEEee040739fD91D29C34C33E6B3E112F2177"
+safe_nonce = "45"
+safe_network = ""
+expected_output_sha256 = "5bca6dd82458401e297db5531227ed6b82535d0789f4b992f3e436b99f829764"
+expected_canonical_sha256 = "48a50a9a0f843d81fa336aab0af51fac6c5bcd0bdd10be4439307f5100d1da01"
+expected_safe_tx_hash = "0xea1342c783409e51c34c6a2b3beed1f79699425391e0e45746cad838b0733293"
+
+[[run]]
+script = "script/BuildSafeService.s.sol:BuildSafeService"
+
+[run.defaults]
+input_format = "safe-service"
+input_profile = "safe"
+safe_version = "1.3.0"
+
+[[run.claim]]
+output_path = "out/safe-service.json"
+chain_id = "1"
+safe_address = "0x111CEEee040739fD91D29C34C33E6B3E112F2177"
+safe_nonce = "46"
+safe_network = ""
+expected_output_sha256 = "c63bc0484780d9ee34a7a8cce3626dbea1eae0d515131000b9e7acf376da5fac"
+expected_canonical_sha256 = "3b8922f5480632cbb5abd0394f054afd9fb83c85b1c532307164e58a827b87d6"
+expected_safe_tx_hash = "0x3599ecc8b2c3b9aec60eb9906199c9df9e4047f84a37e708c9bec7c1699ba21e"
+
+[[run.claim]]
+output_path = "out/safe-service-utils.json"
+input_profile = "safe-utils"
+chain_id = "1"
+safe_address = "0x111CEEee040739fD91D29C34C33E6B3E112F2177"
+safe_nonce = "47"
+safe_network = ""
+expected_output_sha256 = "82c5a7ce80123dbb1ee8482bb35fabb096a253d1d83b47f7224eef53d2693f46"
+expected_canonical_sha256 = "86f723776bd59e332774877f60d7a04146b62c4d1d3f86918267e4d0360d94a0"
+expected_safe_tx_hash = "0x56987e4d84567124bd980cf29c167969d490e947ea564b5d3ec3a5b5ba450dfb"
+
+[[run]]
+script = "script/BuildSafeDecodedBatch.s.sol:BuildSafeDecodedBatch"
+
+[run.defaults]
+input_format = "tx-builder"
+input_profile = "static-v1"
+safe_version = "1.3.0"
+
+[[run.claim]]
+output_path = "out/safe-decoded-batch.json"
+chain_id = "1"
+safe_address = "0x111CEEee040739fD91D29C34C33E6B3E112F2177"
+safe_nonce = "48"
+safe_network = ""
+expected_output_sha256 = "e5caa3582ae9e46b3835eb1d41ccef3de8a4191883d9ae6e6e23df935b6c66ea"
+expected_canonical_sha256 = "076c2b2725ad756f5b2a76ad0e7904c1c8431be434f6f28f4a5651642646d71a"
+expected_safe_tx_hash = "0x45166bbff3f6b0b130d53f0b873270210f17fb8c517bb7dd8b7724337cc7ad45"
