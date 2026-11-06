@@ -1,6 +1,6 @@
 # forge-attest-example-safe-ops
 
-A reference "producer" repo for [`forge-attest`](https://github.com/crossecute/forge-attest/tree/v1.3.0). It stands in
+A reference "producer" repo for [`forge-attest`](https://github.com/crossecute/forge-attest/tree/v1.4.0). It stands in
 for a real operations repo whose Forge scripts build transactions to be submitted
 to a Gnosis Safe.
 
@@ -22,7 +22,7 @@ forge script script/BuildSafeService.s.sol:BuildSafeService
 forge script script/BuildSafeDecodedBatch.s.sol:BuildSafeDecodedBatch
 ```
 
-## Verify with forge-attest v1.3.0
+## Verify with forge-attest v1.4.0
 
 [`attest.toml`](attest.toml) covers all five scripts and seven claims at a pinned producer commit.
 Each `[[run]]` runs one script, `[run.defaults]` sets its normalization options,
@@ -33,7 +33,7 @@ With Foundry, Git, Bash and jq installed, run from this repo:
 
 ```bash
 git clone https://github.com/crossecute/forge-attest.git ../forge-attest
-git -C ../forge-attest checkout --detach 09b0c9b69f1b779ffb5938899775f93d2e423528 # v1.3.0
+git -C ../forge-attest checkout --detach 9e76385ac2f96f171ceb9391cf9e8298e2d408cf # v1.4.0
 ../forge-attest/attest.sh --config attest.toml
 ```
 
@@ -73,7 +73,7 @@ policy contract is assumed. Its fixed `createdAt` makes the source byte-stable.
 Only the off-chain JSON format changes: equivalent decoded and encoded calls have
 the same canonical transaction, on-chain calldata and execution cost. Each static
 argument occupies one 32-byte ABI word. See the
-[v1.3.0 reader profiles](https://github.com/crossecute/forge-attest/blob/v1.3.0/docs/producer-readers.md)
+[reader profiles](https://github.com/crossecute/forge-attest/blob/v1.4.0/docs/producer-readers.md)
 for schema limits and unsupported inputs.
 
 With the verifier checked out at the pinned release above, run:
@@ -89,6 +89,34 @@ profile opt-ins, a wrong typed-data chain, a wrong service hash, conflicting
 calldata and uint8 overflow. Finally it attests all seven pinned claims using a
 local Git clone and checks cast/Solidity agreement. The pinned producer commit
 must exist locally. CI runs the same checks in addition to the release action.
+
+## Attest a Zeus script (v1.4.0)
+
+Zeus `MultisigBuilder` scripts write no file. They emit `ZeusRequireMultisig` and make
+their calls as the multisig, and the Zeus CLI reads the Safe and the calls from the
+`forge script` traces. [`attest.zeus.toml`](attest.zeus.toml) uses
+`input_format = "zeus-traces"` to do the same from the run's own output, for a script in
+[`Layr-Labs/eigenx-contracts`](https://github.com/Layr-Labs/eigenx-contracts) that is not
+part of this repo. It needs only this config:
+
+```bash
+MAINNET_RPC_URL=https://eth.drpc.org ../forge-attest/attest.sh --config attest.zeus.toml --require-live
+```
+
+The four calls fold into one MultiSend transaction with the `safeTxHash`
+`0x9e338be3…f478`, which the Safe `0x684c…9e09` executed at nonce 0. Notes:
+
+- The run needs an archive RPC for `fork_block`. The public `eth.drpc.org` endpoint served it
+  when I tried; use your own for anything that matters.
+- The `ZEUS_*` values in `[run.env]` decide which contracts the calls go to. Zeus injects them
+  from its environment metadata. Here I read them back from the executed transaction, so a real
+  claim should take them from the metadata and review them like calldata.
+- `multisend_address` is the plain MultiSend of Safe 1.4.1, which is what that transaction used.
+  No default is guessed.
+- The commit pinned here postdates the execution, so it may differ from the producer's own.
+  The calls matched.
+- A reverted call, a call the script makes as itself, a contract creation or a second event
+  fails the run. Only forge 1.8.1 was tried.
 
 ## The two shapes, and why the difference matters
 
@@ -176,4 +204,4 @@ SAFE_API_KEY=<key> ../forge-attest/attest.sh --config my-claims.toml --attest --
 Batches need no separate folding step: the claim binds the batch to its Safe and
 nonce, and what is signed is the same canonical form the verifier hashed. See
 "Signing off from the command line" in the
-[`forge-attest` v1.3.0 README](https://github.com/crossecute/forge-attest/blob/v1.3.0/README.md#signing-off-from-the-command-line).
+[`forge-attest` v1.4.0 README](https://github.com/crossecute/forge-attest/blob/v1.4.0/README.md#signing-off-from-the-command-line).

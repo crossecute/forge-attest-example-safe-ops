@@ -1,0 +1,34 @@
+# Attests a Zeus MultisigBuilder script that writes no file: its calls come from the traces of its own forge run.
+# The producer is Layr-Labs/eigenx-contracts. The Safe transaction at nonce 0 of 0x684c…9e09 executed from this script.
+# Needs an archive RPC: MAINNET_RPC_URL=https://eth.drpc.org ../forge-attest/attest.sh --config attest.zeus.toml --require-live
+producer_repo = "https://github.com/Layr-Labs/eigenx-contracts"
+producer_commit = "f0d751f5c9bc3f7fb42c02646f67e31dbc577467"
+producer_setup = "git submodule update --init --recursive"
+expected_forge_version = "1.8.1"
+
+[[run]]
+script = "script/releases/v1.0.4-init/2-acceptAdminAndSetLimits.s.sol"
+rpc_env = "MAINNET_RPC_URL"
+fork_block = "23443614"
+
+# The values Zeus would inject from its environment metadata. They decide which contracts the
+# calls go to, so review them like calldata. Here they were read back from the executed transaction.
+[run.env]
+ZEUS_ENV = "mainnet"
+ZEUS_ENV_PermissionController = "0x25E5F8B1E7aDf44518d35D5B2271f114e081f0E5"
+ZEUS_DEPLOYED_AppController_Proxy = "0xC38d35Fc995e75342A21CBd6D770305b142Fbe67"
+ZEUS_ENV_computeOpsMultisig = "0x684cf8978c2815716c85eAa237E311f5a44e9e09"
+ZEUS_ENV_computeWhitelisterMultisig = "0xDECf19D1551e77DeFBe53ee2c38205a3f852163c"
+ZEUS_ENV_MAX_GLOBAL_ACTIVE_APPS = "100"
+
+[[run.claim]]
+output_path = "zeus/2-acceptAdminAndSetLimits"
+input_format = "zeus-traces"
+safe_version = "1.4.1"
+multisend_address = "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526"
+safe_nonce = "0"
+chain_id = "1"
+safe_network = "ethereum"
+safe_address = "0x684cf8978c2815716c85eAa237E311f5a44e9e09"
+expected_canonical_sha256 = "90a3184d7f074353d66d48d5501605e6f95bf203344e0a4d8b191c964ac6b3de"
+expected_safe_tx_hash = "0x9e338be37a1756a80652767968a61be506fce16a0cbbec8d7441ff5e7724f478"
