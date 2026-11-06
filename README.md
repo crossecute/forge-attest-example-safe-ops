@@ -90,6 +90,34 @@ calldata and uint8 overflow. Finally it attests all seven pinned claims using a
 local Git clone and checks cast/Solidity agreement. The pinned producer commit
 must exist locally. CI runs the same checks in addition to the release action.
 
+## Attest a Zeus script (v1.4.0)
+
+Zeus `MultisigBuilder` scripts write no file. They emit `ZeusRequireMultisig` and make
+their calls as the multisig, and the Zeus CLI reads the Safe and the calls from the
+`forge script` traces. [`attest.zeus.toml`](attest.zeus.toml) uses
+`input_format = "zeus-traces"` to do the same from the run's own output, for a script in
+[`Layr-Labs/eigenx-contracts`](https://github.com/Layr-Labs/eigenx-contracts) that is not
+part of this repo. It needs only this config:
+
+```bash
+MAINNET_RPC_URL=https://eth.drpc.org ../forge-attest/attest.sh --config attest.zeus.toml --require-live
+```
+
+The four calls fold into one MultiSend transaction with the `safeTxHash`
+`0x9e338be3…f478`, which the Safe `0x684c…9e09` executed at nonce 0. Notes:
+
+- The run needs an archive RPC for `fork_block`. The public `eth.drpc.org` endpoint served it
+  when I tried; use your own for anything that matters.
+- The `ZEUS_*` values in `[run.env]` decide which contracts the calls go to. Zeus injects them
+  from its environment metadata. Here I read them back from the executed transaction, so a real
+  claim should take them from the metadata and review them like calldata.
+- `multisend_address` is the plain MultiSend of Safe 1.4.1, which is what that transaction used.
+  No default is guessed.
+- The commit pinned here postdates the execution, so it may differ from the producer's own.
+  The calls matched.
+- A reverted call, a call the script makes as itself, a contract creation or a second event
+  fails the run. Only forge 1.8.1 was tried.
+
 ## The two shapes, and why the difference matters
 
 `BuildSafeTx` emits every EIP-712 `SafeTx` field, so its output *is* a
