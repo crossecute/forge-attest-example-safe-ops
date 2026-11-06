@@ -1,6 +1,6 @@
 # forge-attest-example-safe-ops
 
-A reference "producer" repo for [`forge-attest`](https://github.com/crossecute/forge-attest/tree/v1.3.0). It stands in
+A reference "producer" repo for [`forge-attest`](https://github.com/crossecute/forge-attest/tree/v1.4.0). It stands in
 for a real operations repo whose Forge scripts build transactions to be submitted
 to a Gnosis Safe.
 
@@ -22,7 +22,7 @@ forge script script/BuildSafeService.s.sol:BuildSafeService
 forge script script/BuildSafeDecodedBatch.s.sol:BuildSafeDecodedBatch
 ```
 
-## Verify with forge-attest v1.3.0
+## Verify with forge-attest v1.4.0
 
 [`attest.toml`](attest.toml) covers all five scripts and seven claims at a pinned producer commit.
 Each `[[run]]` runs one script, `[run.defaults]` sets its normalization options,
@@ -33,7 +33,7 @@ With Foundry, Git, Bash and jq installed, run from this repo:
 
 ```bash
 git clone https://github.com/crossecute/forge-attest.git ../forge-attest
-git -C ../forge-attest checkout --detach 09b0c9b69f1b779ffb5938899775f93d2e423528 # v1.3.0
+git -C ../forge-attest checkout --detach 9e76385ac2f96f171ceb9391cf9e8298e2d408cf # v1.4.0
 ../forge-attest/attest.sh --config attest.toml
 ```
 
@@ -73,7 +73,7 @@ policy contract is assumed. Its fixed `createdAt` makes the source byte-stable.
 Only the off-chain JSON format changes: equivalent decoded and encoded calls have
 the same canonical transaction, on-chain calldata and execution cost. Each static
 argument occupies one 32-byte ABI word. See the
-[v1.3.0 reader profiles](https://github.com/crossecute/forge-attest/blob/v1.3.0/docs/producer-readers.md)
+[reader profiles](https://github.com/crossecute/forge-attest/blob/v1.4.0/docs/producer-readers.md)
 for schema limits and unsupported inputs.
 
 With the verifier checked out at the pinned release above, run:
@@ -176,4 +176,4 @@ SAFE_API_KEY=<key> ../forge-attest/attest.sh --config my-claims.toml --attest --
 Batches need no separate folding step: the claim binds the batch to its Safe and
 nonce, and what is signed is the same canonical form the verifier hashed. See
 "Signing off from the command line" in the
-[`forge-attest` v1.3.0 README](https://github.com/crossecute/forge-attest/blob/v1.3.0/README.md#signing-off-from-the-command-line).
+[`forge-attest` v1.4.0 README](https://github.com/crossecute/forge-attest/blob/v1.4.0/README.md#signing-off-from-the-command-line).

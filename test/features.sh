@@ -2,9 +2,9 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERIFIER="$(cd "${1:?usage: bash test/features.sh /path/to/forge-attest}" && pwd)"
-RELEASE=09b0c9b69f1b779ffb5938899775f93d2e423528
+RELEASE=9e76385ac2f96f171ceb9391cf9e8298e2d408cf
 [[ "$(git -C "$VERIFIER" rev-parse HEAD)" == "$RELEASE" ]] || {
-  echo "Expected forge-attest v1.3.0 ($RELEASE)" >&2
+  echo "Expected forge-attest v1.4.0 ($RELEASE)" >&2
   exit 1
 }
 TMP=$(mktemp -d)

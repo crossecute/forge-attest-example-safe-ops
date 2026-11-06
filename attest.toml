@@ -1,4 +1,4 @@
-# Worked claims for forge-attest v1.3.0, with live queue checks disabled.
+# Worked claims for forge-attest v1.4.0, with live queue checks disabled.
 producer_repo = "https://github.com/crossecute/forge-attest-example-safe-ops"
 producer_commit = "cd75db7acc7286d70ddfd3b76659fcd143ab14f1"
 producer_setup = ""
